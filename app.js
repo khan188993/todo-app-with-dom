@@ -9,6 +9,8 @@ const incompleteFilterBtnElem = document.getElementById('incomplete-filter-btn')
 
 let allTodos = [];
 let taskLeft = '';
+let filterType = 'all';
+let filterColor = [];
 
 //get left task
 function getLeftTask(taskLength) {
@@ -21,15 +23,46 @@ function getLeftTask(taskLength) {
    }
 }
 
+function filterTypeCheck(filterType) {
+   //filter type style add
+   if (filterType === 'complete') {
+      completedFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
+      allFilterBtnElem.setAttribute('class', 'cursor-pointer');
+      incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer');
+   } else if (filterType === 'incomplete') {
+      incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
+      completedFilterBtnElem.setAttribute('class', 'cursor-pointer');
+      allFilterBtnElem.setAttribute('class', 'cursor-pointer');
+   } else {
+      allFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
+      completedFilterBtnElem.setAttribute('class', 'cursor-pointer');
+      incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer');
+   }
+}
+
 //fetch all todos
 function fetchAllTodos() {
-   fetch('http://localhost:9000/newTodos')
+   const url = 'http://localhost:9000/newTodos';
+
+   fetch(url)
       .then((res) => res.json())
       .then((data) => {
          allTodos = data;
-         taskLeft = allTodos.filter((todo) => todo.completed===true).length;
+         taskLeft = allTodos.filter((todo) => todo.completed === true).length;
          //getting left task
          taskLeftElem.innerHTML = getLeftTask(taskLeft);
+         console.log('all todos');
+         displayTodos(allTodos);
+      });
+}
+// filter fetch all todos
+function filterFetchTodos(filter = null, filterType) {
+   const url = filter ? `http://localhost:9000/newTodos?completed=false` : 'http://localhost:9000/newTodos?completed=true';
+   fetch(url)
+      .then((res) => res.json())
+      .then((data) => {
+         allTodos = data;
+         filterTypeCheck(filterType); //filter type send for filter show
          displayTodos(allTodos);
       });
 }
@@ -98,7 +131,26 @@ function clearCompletedTodo() {
    console.log('clear completed todo');
 }
 
-function displayTodos(allTodos) {
+//all filter
+function allFilter() {
+   fetchAllTodos();
+}
+allFilterBtnElem.addEventListener('click', allFilter);
+
+//completed filter
+function completeFilter() {
+   filterType = 'complete';
+   filterFetchTodos(true, filterType);
+}
+completedFilterBtnElem.addEventListener('click', completeFilter);
+//incomplete filter
+function incompleteFilter() {
+   filterType = 'incomplete';
+   filterFetchTodos(false, filterType);
+}
+incompleteFilterBtnElem.addEventListener('click', incompleteFilter);
+
+function displayTodos(allTodos, filter = 'all') {
    let allTodoHtml = '';
    //iterate all todo and add into html
    allTodos.forEach((todo, index) => {
