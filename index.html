@@ -166,21 +166,26 @@
                 <div class="mt-4 flex justify-between text-xs text-gray-500">
                     <p id="task-left">2 tasks left</p>
                     <ul class="flex space-x-1 items-center text-xs">
-                        <li class="cursor-pointer font-bold" id="all-filter-btn">All</li>
+                        <li onclick="filterByStatusHandler('all')" class="cursor-pointer font-bold" id="all-filter-btn">All</li>
                         <li>|</li>
-                        <li class="cursor-pointer" id="incomplete-filter-btn">Incomplete</li>
+                        <li onclick="filterByStatusHandler('incomplete')" class="cursor-pointer" id="incomplete-filter-btn">Incomplete</li>
                         <li>|</li>
-                        <li class="cursor-pointer" id="complete-filter-btn">Complete</li>
+                        <li onclick="filterByStatusHandler('complete')" class="cursor-pointer" id="complete-filter-btn">Complete</li>
                         <li></li>
                         <li></li>
                         <li
-                            onclick="colorFilter()"
-                            class="h-3 w-3 border-2 border-green-500 md:hover:bg-green-500 rounded-full cursor-pointer bg-green-500"
+                            onclick="filterByColorHandler('green')"
+                            id="global-filter-green"
+                            class="h-3 w-3 border-2 border-green-500 md:hover:bg-green-500 rounded-full cursor-pointer"
                         ></li>
                         <li
+                            onclick="filterByColorHandler('red')"
+                            id="global-filter-red"
                             class="h-3 w-3 border-2 border-red-500 md:hover:bg-red-500 rounded-full cursor-pointer"
                         ></li>
                         <li
+                            onclick="filterByColorHandler('yellow')"
+                            id="global-filter-yellow"
                             class="h-3 w-3 border-2 border-yellow-500 md:hover:bg-yellow-500 rounded-full cursor-pointer"
                         ></li>
                     </ul>

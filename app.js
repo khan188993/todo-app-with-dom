@@ -6,11 +6,14 @@ const taskLeftElem = document.getElementById('task-left');
 const allFilterBtnElem = document.getElementById('all-filter-btn');
 const completedFilterBtnElem = document.getElementById('complete-filter-btn');
 const incompleteFilterBtnElem = document.getElementById('incomplete-filter-btn');
+const globalFilterGreenBtnElem = document.getElementById('global-filter-green');
+const globalFilterYellowBtnElem = document.getElementById('global-filter-yellow');
+const globalFilterRedBtnElem = document.getElementById('global-filter-red');
 
 let allTodos = [];
 let taskLeft = '';
-let filterType = 'all';
-let filterColor = [];
+let filterStatusType = 'all';
+let filterColorType = [];
 
 //get left task
 function getLeftTask(taskLength) {
@@ -23,20 +26,44 @@ function getLeftTask(taskLength) {
    }
 }
 
-function filterTypeCheck(filterType) {
+function filterStatusTypeCheck(filterStatusType) {
    //filter type style add
-   if (filterType === 'complete') {
+   if (filterStatusType === 'complete') {
       completedFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
       allFilterBtnElem.setAttribute('class', 'cursor-pointer');
       incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer');
-   } else if (filterType === 'incomplete') {
+   } else if (filterStatusType === 'incomplete') {
       incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
       completedFilterBtnElem.setAttribute('class', 'cursor-pointer');
       allFilterBtnElem.setAttribute('class', 'cursor-pointer');
-   } else {
+   } else if (filterStatusType === 'all') {
       allFilterBtnElem.setAttribute('class', 'cursor-pointer font-bold');
       completedFilterBtnElem.setAttribute('class', 'cursor-pointer');
       incompleteFilterBtnElem.setAttribute('class', 'cursor-pointer');
+   }
+}
+
+function filterColorTypeCheck(isExistFilterColors, colorName) {
+   if (colorName === 'red') {
+      if (!isExistFilterColors) {
+         globalFilterRedBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-red-500 md:hover:bg-red-500 rounded-full cursor-pointer bg-red-500');
+      } else {
+         globalFilterRedBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-red-500 md:hover:bg-red-500 rounded-full cursor-pointer');
+      }
+   }
+   if (colorName === 'green') {
+      if (!isExistFilterColors) {
+         globalFilterGreenBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-green-500 md:hover:bg-green-500 rounded-full cursor-pointer bg-green-500');
+      } else {
+         globalFilterGreenBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-green-500 md:hover:bg-green-500 rounded-full cursor-pointer');
+      }
+   }
+   if (colorName === 'yellow') {
+      if (!isExistFilterColors) {
+         globalFilterYellowBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-yellow-500 md:hover:bg-yellow-500 rounded-full cursor-pointer bg-yellow-500');
+      } else {
+         globalFilterYellowBtnElem.setAttribute('class', 'h-3 w-3 border-2 border-yellow-500 md:hover:bg-yellow-500 rounded-full cursor-pointer');
+      }
    }
 }
 
@@ -51,24 +78,40 @@ function fetchAllTodos() {
          taskLeft = allTodos.filter((todo) => todo.completed === true).length;
          //getting left task
          taskLeftElem.innerHTML = getLeftTask(taskLeft);
-         console.log('all todos');
          displayTodos(allTodos);
       });
 }
-// filter fetch all todos
-function filterFetchTodos(filter = null, filterType) {
-   const url = filter ? `http://localhost:9000/newTodos?completed=false` : 'http://localhost:9000/newTodos?completed=true';
-   fetch(url)
-      .then((res) => res.json())
-      .then((data) => {
-         allTodos = data;
-         filterTypeCheck(filterType); //filter type send for filter show
-         displayTodos(allTodos);
-      });
-}
-
 //fetch all todo initial call
 fetchAllTodos();
+
+//filter todos
+function filterTodos(filterStatusType, filterColor) {
+   console.log(filterStatusType, filterColor, allTodos);
+   const filteredAllTodos = allTodos
+      .filter((todo) => {
+         //type filter
+         if (filterStatusType === 'all') {
+            return true;
+         }
+         if (filterStatusType === 'complete') {
+            return todo.completed;
+         }
+         if (filterStatusType === 'incomplete') {
+            return !todo.completed;
+         }
+      })
+      .filter((todo) => {
+         //color filter
+         if (filterColor.length === 0) {
+            return true;
+         }
+         if (filterColor.includes(todo.color)) {
+            return true;
+         }
+      });
+      //add filtering todos 
+   displayTodos(filteredAllTodos);
+}
 
 //delete todo and refetch
 function deleteTodo(id) {
@@ -131,29 +174,31 @@ function clearCompletedTodo() {
    console.log('clear completed todo');
 }
 
-//all filter
-function allFilter() {
-   fetchAllTodos();
+//filter by status handler
+function filterByStatusHandler(status) {
+   filterStatusType = status;
+   filterStatusTypeCheck(filterStatusType);
+   filterTodos(filterStatusType, filterColorType);
 }
-allFilterBtnElem.addEventListener('click', allFilter);
 
-//completed filter
-function completeFilter() {
-   filterType = 'complete';
-   filterFetchTodos(true, filterType);
-}
-completedFilterBtnElem.addEventListener('click', completeFilter);
-//incomplete filter
-function incompleteFilter() {
-   filterType = 'incomplete';
-   filterFetchTodos(false, filterType);
-}
-incompleteFilterBtnElem.addEventListener('click', incompleteFilter);
+//filter by colors handler
+function filterByColorHandler(colorName) {
+   const isExistFilterColors = filterColorType.includes(colorName);
 
-function displayTodos(allTodos, filter = 'all') {
+   //if color not exist then add otherwise remove
+   if (isExistFilterColors) {
+      filterColorType = filterColorType.filter((color) => color !== colorName);
+   } else {
+      filterColorType = [...filterColorType, colorName];
+   }
+   filterColorTypeCheck(isExistFilterColors, colorName);
+   filterTodos(filterStatusType, filterColorType);
+}
+
+function displayTodos(allTodos) {
    let allTodoHtml = '';
    //iterate all todo and add into html
-   allTodos.forEach((todo, index) => {
+   allTodos.forEach((todo) => {
       allTodoHtml = `${allTodoHtml} <div
         class="flex justify-start items-center p-2 hover:bg-gray-100 hover:transition-all space-x-4 border-b border-gray-400/20 last:border-0"
     >
