@@ -23,9 +23,9 @@ fetchAllTodos();
 
 function displayTodos(allTodos) {
    let allTodoHtml = '';
-   //iterate all todo and add into html 
+   //iterate all todo and add into html
    allTodos.forEach((todo, index) => {
-        const {id,text,completed,color} = todo || {};
+      const { id, text, completed, color } = todo || {};
       allTodoHtml = `${allTodoHtml} <div
         class="flex justify-start items-center p-2 hover:bg-gray-100 hover:transition-all space-x-4 border-b border-gray-400/20 last:border-0"
     >
@@ -69,11 +69,18 @@ function displayTodos(allTodos) {
     </div>`;
    });
    allTodoWrapper.innerHTML = allTodoHtml;
-   
 }
 
-
-
+//delete todo and refetch
+function deleteTodo(id) {
+   //delete todo api call
+   fetch(`http://localhost:9000/newTodos/${id}`, {
+      method: 'DELETE',
+   }).then(() => {
+      //after delete refetch todo data again
+      fetchAllTodos();
+   });
+}
 
 /**
  * get all todo and set into allTodo array after then loop the allTodo array and add todo child into wrapper,
