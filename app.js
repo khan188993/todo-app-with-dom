@@ -233,6 +233,7 @@ function addEditTodo(e) {
             //after edit done refetch todo data again
             e.target.newTodo.value = ''; //clear input
             editTodoData = {}; //clearing edit data after edit done
+            addTodoFormElem.imageBtn.setAttribute('class', 'appearance-none w-8 h-8 bg-[url("./images/plus.png")] bg-no-repeat bg-contain');
             fetchAllTodos();
          });
       } else {
@@ -266,6 +267,7 @@ addTodoFormElem.addEventListener('submit', addEditTodo);
 function editTodo(id) {
    editTodoData = allTodos.find((todo) => todo.id === id);
    addTodoFormElem.newTodo.value = editTodoData?.text;
+   addTodoFormElem.imageBtn.setAttribute('class', 'appearance-none w-8 h-8 bg-[url("./images/notes.png")] bg-no-repeat bg-contain');
 }
 
 //?display all todo
@@ -325,9 +327,3 @@ function displayTodos(allTodos) {
    });
    allTodoWrapper.innerHTML = allTodoHtml;
 }
-
-/**
- * get all todo and set into allTodo array after then loop the allTodo array and add todo child into wrapper,
- * set onClick into completed, edit,deleted btn,
- *
- */
