@@ -1,3 +1,4 @@
+//all selectors
 const addTodoFormElem = document.getElementById('add-todo-form');
 const allTodoWrapper = document.getElementById('all-todo-wrapper');
 const completedAllBtnElem = document.getElementById('completed-all-btn');
@@ -10,12 +11,14 @@ const globalFilterGreenBtnElem = document.getElementById('global-filter-green');
 const globalFilterYellowBtnElem = document.getElementById('global-filter-yellow');
 const globalFilterRedBtnElem = document.getElementById('global-filter-red');
 
+//initial variables
 let allTodos = [];
 let taskLeft = '';
 let filterStatusType = 'all';
 let filterColorType = [];
+let editTodoData = {};
 
-//get left task
+//get task left number
 function getLeftTask(taskLength) {
    if (taskLength > 1) {
       return `${taskLength} tasks left`;
@@ -26,6 +29,7 @@ function getLeftTask(taskLength) {
    }
 }
 
+//filter status style updating
 function filterStatusTypeCheck(filterStatusType) {
    //filter type style add
    if (filterStatusType === 'complete') {
@@ -43,6 +47,7 @@ function filterStatusTypeCheck(filterStatusType) {
    }
 }
 
+//filter color style updating
 function filterColorTypeCheck(isExistFilterColors, colorName) {
    if (colorName === 'red') {
       if (!isExistFilterColors) {
@@ -67,16 +72,16 @@ function filterColorTypeCheck(isExistFilterColors, colorName) {
    }
 }
 
-//fetch all todos
+//fetch all todo
 function fetchAllTodos() {
    const url = 'http://localhost:9000/newTodos';
-
    fetch(url)
       .then((res) => res.json())
       .then((data) => {
          allTodos = data;
-         taskLeft = allTodos.filter((todo) => todo.completed === true).length;
-         //getting left task
+         //getting incomplete todo
+         taskLeft = allTodos.filter((todo) => todo.completed === false).length;
+         //after filter incomplete task pass it and getting left task
          taskLeftElem.innerHTML = getLeftTask(taskLeft);
          displayTodos(allTodos);
       });
@@ -84,7 +89,7 @@ function fetchAllTodos() {
 //fetch all todo initial call
 fetchAllTodos();
 
-//filter todos
+//filtering todos with status and color types
 function filterTodos(filterStatusType, filterColor) {
    console.log(filterStatusType, filterColor, allTodos);
    const filteredAllTodos = allTodos
@@ -113,7 +118,7 @@ function filterTodos(filterStatusType, filterColor) {
    displayTodos(filteredAllTodos);
 }
 
-//delete todo and refetch
+//delete todo with id and refetch
 function deleteTodo(id) {
    //delete todo api call
    fetch(`http://localhost:9000/newTodos/${id}`, {
@@ -124,7 +129,7 @@ function deleteTodo(id) {
    });
 }
 
-//complete todo and refetch
+//complete single todo and refetch
 function completeTodo(id) {
    //find editing value and edit
    const editingTodo = allTodos.find((todo) => todo.id === id);
@@ -145,6 +150,7 @@ function completeTodo(id) {
    });
 }
 
+//edit todo with color into single todo
 function colorEditTodo(id, colorName) {
    //find editing value and edit
    const editingTodo = allTodos.find((todo) => todo.id === id);
@@ -164,14 +170,6 @@ function colorEditTodo(id, colorName) {
       //after edit done refetch todo data again
       fetchAllTodos();
    });
-}
-
-function completedAllTodo() {
-   console.log('completed all todo');
-}
-
-function clearCompletedTodo() {
-   console.log('clear completed todo');
 }
 
 //filter by status handler
@@ -195,7 +193,7 @@ function filterByColorHandler(colorName) {
    filterTodos(filterStatusType, filterColorType);
 }
 
-//clear all completed todos / true todos  / delete all true todos
+//clear all complete todo in one click
 function clearAllCompleted() {
    //find all completed todo and after find delete by foreach
    const completedTodos = allTodos.filter((todo) => todo.completed);
@@ -205,6 +203,7 @@ function clearAllCompleted() {
 }
 clearAllCompleteBtnElem.addEventListener('click', clearAllCompleted);
 
+//complete all incomplete todo in one click
 completedAllBtnElem.addEventListener('click', function () {
    //find all completed todo and after find complete all incomplete by foreach
    const incompleteTodos = allTodos.filter((todo) => !todo.completed);
@@ -213,6 +212,63 @@ completedAllBtnElem.addEventListener('click', function () {
    });
 });
 
+//add edit todo handler
+function addEditTodo(e) {
+   e.preventDefault();
+   const newTodoText = e.target.newTodo.value;
+   if (newTodoText) {
+      if (editTodoData?.text) {
+         console.log('edit todo');
+         //complete single todo api call for edit
+         fetch(`http://localhost:9000/newTodos/${editTodoData?.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+               ...editTodoData,
+               text: newTodoText,
+            }),
+            headers: {
+               'Content-type': 'application/json; charset=UTF-8',
+            },
+         }).then(() => {
+            //after edit done refetch todo data again
+            e.target.newTodo.value = ''; //clear input
+            editTodoData = {}; //clearing edit data after edit done
+            fetchAllTodos();
+         });
+      } else {
+         console.log('add todo');
+         //complete single todo api call for edit
+         fetch(`http://localhost:9000/newTodos`, {
+            method: 'POST',
+            body: JSON.stringify({
+               text: newTodoText,
+               completed: false,
+               color: '',
+            }),
+            headers: {
+               'Content-type': 'application/json; charset=UTF-8',
+            },
+         }).then(() => {
+            //after edit done refetch todo data again
+            e.target.newTodo.value = ''; //clear input
+            fetchAllTodos();
+         });
+      }
+   } else {
+      alert('please fill the todo input properly');
+   }
+}
+
+//?add new todo into api and refetch
+addTodoFormElem.addEventListener('submit', addEditTodo);
+
+//edit todo with id
+function editTodo(id) {
+   editTodoData = allTodos.find((todo) => todo.id === id);
+   addTodoFormElem.newTodo.value = editTodoData?.text;
+}
+
+//?display all todo
 function displayTodos(allTodos) {
    let allTodoHtml = '';
    //iterate all todo and add into html
@@ -237,8 +293,9 @@ function displayTodos(allTodos) {
         </div>
 
         <div class="select-none flex-1 ${todo?.completed && 'line-through'} ">
-            Learn React from Learn with Sumit YouTube Channel
+            ${todo?.text}
         </div>
+        
 
         <div onclick="colorEditTodo(${todo?.id},'green')"
             class=" ${todo?.color === 'green' ? 'bg-green-500' : ''} flex-shrink-0 h-4 w-4 rounded-full border-2 ml-auto cursor-pointer border-green-500 hover:bg-green-500"
@@ -257,6 +314,12 @@ function displayTodos(allTodos) {
             src="./images/cancel.png"
             class="flex-shrink-0 w-4 h-4 ml-2 cursor-pointer"
             alt="Cancel"
+        />
+        <img
+            onclick="editTodo(${todo?.id})"
+            src="./images/notes.png"
+            class="flex-shrink-0 w-4 h-4 ml-2 cursor-pointer"
+            alt="note"
         />
     </div>`;
    });
