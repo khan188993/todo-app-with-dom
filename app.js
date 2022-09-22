@@ -74,7 +74,7 @@ function filterColorTypeCheck(isExistFilterColors, colorName) {
 
 //fetch all todo
 function fetchAllTodos() {
-   const url = 'https://todo-app-server-lws.herokuapp.com/todos';
+   const url = 'http://localhost:9000/newTodos';
    fetch(url)
       .then((res) => res.json())
       .then((data) => {
@@ -121,7 +121,7 @@ function filterTodos(filterStatusType, filterColor) {
 //delete todo with id and refetch
 function deleteTodo(id) {
    //delete todo api call
-   fetch(`https://todo-app-server-lws.herokuapp.com/todos/${id}`, {
+   fetch(`http://localhost:9000/newTodos/${id}`, {
       method: 'DELETE',
    }).then(() => {
       //after delete refetch todo data again
@@ -135,7 +135,7 @@ function completeTodo(id) {
    const editingTodo = allTodos.find((todo) => todo.id === id);
 
    //complete single todo api call for edit
-   fetch(`https://todo-app-server-lws.herokuapp.com/todos/${editingTodo?.id}`, {
+   fetch(`http://localhost:9000/newTodos/${editingTodo?.id}`, {
       method: 'PUT',
       body: JSON.stringify({
          ...editingTodo,
@@ -157,7 +157,7 @@ function colorEditTodo(id, colorName) {
    const setColor = editingTodo?.color === colorName ? '' : colorName; //set color if not find any color
 
    //complete single todo api call for edit
-   fetch(`https://todo-app-server-lws.herokuapp.com/todos/${editingTodo?.id}`, {
+   fetch(`http://localhost:9000/newTodos/${editingTodo?.id}`, {
       method: 'PUT',
       body: JSON.stringify({
          ...editingTodo,
@@ -220,7 +220,7 @@ function addEditTodo(e) {
       if (editTodoData?.text) {
          console.log('edit todo');
          //complete single todo api call for edit
-         fetch(`https://todo-app-server-lws.herokuapp.com/todos/${editTodoData?.id}`, {
+         fetch(`http://localhost:9000/newTodos/${editTodoData?.id}`, {
             method: 'PUT',
             body: JSON.stringify({
                ...editTodoData,
@@ -239,7 +239,7 @@ function addEditTodo(e) {
       } else {
          console.log('add todo');
          //complete single todo api call for edit
-         fetch(`https://todo-app-server-lws.herokuapp.com/todos`, {
+         fetch(`http://localhost:9000/newTodos`, {
             method: 'POST',
             body: JSON.stringify({
                text: newTodoText,
