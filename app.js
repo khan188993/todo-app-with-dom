@@ -1,7 +1,7 @@
 const addTodoFormElem = document.getElementById('add-todo-form');
 const allTodoWrapper = document.getElementById('all-todo-wrapper');
 const completedAllBtnElem = document.getElementById('completed-all-btn');
-const clearAllBtnElem = document.getElementById('clear-all-btn');
+const clearAllCompleteBtnElem = document.getElementById('clear-all-btn');
 const taskLeftElem = document.getElementById('task-left');
 const allFilterBtnElem = document.getElementById('all-filter-btn');
 const completedFilterBtnElem = document.getElementById('complete-filter-btn');
@@ -109,7 +109,7 @@ function filterTodos(filterStatusType, filterColor) {
             return true;
          }
       });
-      //add filtering todos 
+   //add filtering todos
    displayTodos(filteredAllTodos);
 }
 
@@ -195,6 +195,24 @@ function filterByColorHandler(colorName) {
    filterTodos(filterStatusType, filterColorType);
 }
 
+//clear all completed todos / true todos  / delete all true todos
+function clearAllCompleted() {
+   //find all completed todo and after find delete by foreach
+   const completedTodos = allTodos.filter((todo) => todo.completed);
+   completedTodos.forEach((todo) => {
+      deleteTodo(todo?.id);
+   });
+}
+clearAllCompleteBtnElem.addEventListener('click', clearAllCompleted);
+
+completedAllBtnElem.addEventListener('click', function () {
+   //find all completed todo and after find complete all incomplete by foreach
+   const incompleteTodos = allTodos.filter((todo) => !todo.completed);
+   incompleteTodos.forEach((todo) => {
+      completeTodo(todo?.id);
+   });
+});
+
 function displayTodos(allTodos) {
    let allTodoHtml = '';
    //iterate all todo and add into html
@@ -211,14 +229,14 @@ function displayTodos(allTodos) {
             class="opacity-0 absolute rounded-full"
         />
             <svg
-                class="${todo?.completed && 'hidden'} fill-current w-3 h-3 text-green-500 pointer-events-none"
+                class="${!todo?.completed && 'hidden'} fill-current w-3 h-3 text-green-500 pointer-events-none"
                 viewBox="0 0 20 20"
             >
                 <path d="M0 11l2-2 5 5L18 3l2 2L7 18z" />
             </svg>
         </div>
 
-        <div class="select-none flex-1 ${!todo?.completed && 'line-through'} ">
+        <div class="select-none flex-1 ${todo?.completed && 'line-through'} ">
             Learn React from Learn with Sumit YouTube Channel
         </div>
 
